@@ -1,6 +1,6 @@
 {
   "title": "Le sirene",
-  "version": "0.1",
+  "version": "0.2",
   "meter": "2/4",
   "audio": {
     "src": "audio/le-sirene-low.mp3",
@@ -46,21 +46,84 @@
       "text": "STRUM1b — gesti ampi tipo saluto",
       "move": "strum1b"
     },
+
+    {
+      "fromBar": 17,
+      "toBar": 19,
+      "text": "Se ti sviluppa pititto",
+      "move": "bellyCircle"
+    },
+    {
+      "fromBar": 20,
+      "toBar": 20,
+      "text": "fermati qua",
+      "move": "comeHere"
+    },
+    {
+      "fromBar": 21,
+      "toBar": 24,
+      "text": "bounce basso",
+      "move": "lowBounce"
+    },
+    {
+      "fromBar": 25,
+      "toBar": 26,
+      "text": "se vai cercando",
+      "move": "visorSearch"
+    },
+    {
+      "fromBar": 27,
+      "toBar": 27,
+      "text": "cunotto",
+      "move": "sleepCute"
+    },
+    {
+      "fromBar": 28,
+      "toBar": 28,
+      "text": "fermati qua",
+      "move": "comeHere"
+    },
+    {
+      "fromBar": 29,
+      "toBar": 32,
+      "text": "bounce basso",
+      "move": "lowBounce"
+    },
+
     {
       "fromBar": 33,
+      "toBar": 36,
+      "text": "Qui troverai tanta varietà",
+      "move": "hawaiianSideStep"
+    },
+    {
+      "fromBar": 37,
       "toBar": 40,
-      "text": "Qui troverai tanta varietà / e capirai un servizio di qualità",
+      "text": "e capirai un servizio di qualità",
       "move": "hawaiianSideStep"
     },
     {
       "fromBar": 41,
-      "toBar": 47,
-      "text": "servizio di qualità / che differenza fa",
+      "toBar": 43,
+      "text": "servizio di qualità — cosa buona",
       "move": "goodThingCircle",
       "params": {
         "hand": "right",
         "circlePerBar": 1,
-        "plane": "frontRight45"
+        "plane": "frontRight45",
+        "depthScale": true
+      }
+    },
+    {
+      "fromBar": 44,
+      "toBar": 47,
+      "text": "che differenza fa",
+      "move": "goodThingCircle",
+      "params": {
+        "hand": "right",
+        "circlePerBar": 1,
+        "plane": "frontRight45",
+        "depthScale": true
       }
     },
     {
@@ -70,7 +133,8 @@
       "move": "accentHead",
       "params": {
         "firstBeat": "right",
-        "secondBeat": "left"
+        "secondBeat": "left",
+        "intensity": 1.2
       }
     },
     {
@@ -86,7 +150,8 @@
       "move": "accentHead",
       "params": {
         "firstBeat": "right",
-        "secondBeat": "left"
+        "secondBeat": "left",
+        "intensity": 1.2
       }
     },
     {
