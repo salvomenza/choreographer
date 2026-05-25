@@ -1,0 +1,99 @@
+{
+  "title": "Le sirene",
+  "version": "0.1",
+  "meter": "2/4",
+  "audio": {
+    "src": "audio/le-sirene-low.mp3",
+    "offset": 0,
+    "volume": 0.8
+  },
+  "timing": {
+    "source": "midi-derived",
+    "sections": [
+      {
+        "id": "strum1",
+        "label": "Strum1",
+        "fromBar": 1,
+        "bars": 16,
+        "duration": 14.235
+      },
+      {
+        "id": "strofa1a",
+        "label": "Strofa 1A",
+        "fromBar": 17,
+        "bars": 16,
+        "duration": 13.624
+      },
+      {
+        "id": "strofa1b",
+        "label": "Strofa 1B",
+        "fromBar": 33,
+        "bars": 25,
+        "barDurationFrom": "strofa1a"
+      }
+    ]
+  },
+  "cues": [
+    {
+      "fromBar": 1,
+      "toBar": 8,
+      "text": "STRUM1a — pugni alternati + anche",
+      "move": "strum1a"
+    },
+    {
+      "fromBar": 9,
+      "toBar": 16,
+      "text": "STRUM1b — gesti ampi tipo saluto",
+      "move": "strum1b"
+    },
+    {
+      "fromBar": 33,
+      "toBar": 40,
+      "text": "Qui troverai tanta varietà / e capirai un servizio di qualità",
+      "move": "hawaiianSideStep"
+    },
+    {
+      "fromBar": 41,
+      "toBar": 47,
+      "text": "servizio di qualità / che differenza fa",
+      "move": "goodThingCircle",
+      "params": {
+        "hand": "right",
+        "circlePerBar": 1,
+        "plane": "frontRight45"
+      }
+    },
+    {
+      "fromBar": 48,
+      "toBar": 48,
+      "text": "SU SSI’",
+      "move": "accentHead",
+      "params": {
+        "firstBeat": "right",
+        "secondBeat": "left"
+      }
+    },
+    {
+      "fromBar": 49,
+      "toBar": 52,
+      "text": "stancu ri manciari iaddhina",
+      "move": "strum1a"
+    },
+    {
+      "fromBar": 53,
+      "toBar": 53,
+      "text": "SULU",
+      "move": "accentHead",
+      "params": {
+        "firstBeat": "right",
+        "secondBeat": "left"
+      }
+    },
+    {
+      "fromBar": 54,
+      "toBar": 57,
+      "text": "masculi ra sira a matina",
+      "move": "strum1a"
+    }
+  ]
+}
