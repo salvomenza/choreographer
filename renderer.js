@@ -20,35 +20,42 @@ function polarPoint(x, y, length, deg) {
   };
 }
 
+function drawLine(group, x1, y1, x2, y2, options = {}) {
+  group.appendChild(
+    svgEl("line", {
+      x1,
+      y1,
+      x2,
+      y2,
+      stroke: options.stroke ?? "#0f172a",
+      "stroke-width": options.width ?? 8,
+      "stroke-linecap": options.cap ?? "round",
+      "stroke-linejoin": "round"
+    })
+  );
+}
+
+function drawPath(group, d, options = {}) {
+  group.appendChild(
+    svgEl("path", {
+      d,
+      fill: options.fill ?? "none",
+      stroke: options.stroke ?? "#0f172a",
+      "stroke-width": options.width ?? 4,
+      "stroke-linecap": options.cap ?? "round",
+      "stroke-linejoin": "round"
+    })
+  );
+}
+
 function drawLimb(group, from, a1, l1, a2, l2, width = 8) {
   const joint = polarPoint(from.x, from.y, l1, a1);
   const end = polarPoint(joint.x, joint.y, l2, a1 + a2);
 
-  group.appendChild(
-    svgEl("line", {
-      x1: from.x,
-      y1: from.y,
-      x2: joint.x,
-      y2: joint.y,
-      stroke: "#0f172a",
-      "stroke-width": width,
-      "stroke-linecap": "round"
-    })
-  );
+  drawLine(group, from.x, from.y, joint.x, joint.y, { width });
+  drawLine(group, joint.x, joint.y, end.x, end.y, { width });
 
-  group.appendChild(
-    svgEl("line", {
-      x1: joint.x,
-      y1: joint.y,
-      x2: end.x,
-      y2: end.y,
-      stroke: "#0f172a",
-      "stroke-width": width,
-      "stroke-linecap": "round"
-    })
-  );
-
-  return { joint, end };
+  return { joint, end, finalAngle: a1 + a2 };
 }
 
 function drawHand(group, x, y, open = true, scale = 1) {
@@ -65,103 +72,246 @@ function drawHand(group, x, y, open = true, scale = 1) {
   }
 
   const hand = svgEl("g", {
-    transform: `translate(${x} ${y}) scale(${scale})`
+    transform: `translate(${x} ${y}) scale(${scale})`,
+    fill: "none",
+    stroke: "#0f172a",
+    "stroke-width": 3,
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round"
   });
 
-  hand.appendChild(
-    svgEl("circle", {
-      cx: 0,
-      cy: 0,
-      r: 7,
-      fill: "none",
-      stroke: "#0f172a",
-      "stroke-width": 3
-    })
-  );
+  hand.appendChild(svgEl("circle", { cx: 0, cy: 0, r: 7 }));
 
   const fingers = [
     [0, -7, 0, -16],
     [-5, -5, -13, -13],
-    [5, -5, 13, -13]
+    [5, -5, 13, -13],
+    [-7, 1, -15, -4]
   ];
 
   for (const [x1, y1, x2, y2] of fingers) {
-    hand.appendChild(
-      svgEl("line", {
-        x1,
-        y1,
-        x2,
-        y2,
-        stroke: "#0f172a",
-        "stroke-width": 3,
-        "stroke-linecap": "round"
-      })
-    );
+    hand.appendChild(svgEl("line", { x1, y1, x2, y2 }));
   }
 
   group.appendChild(hand);
 }
 
+function drawFoot(group, ankle, angle, side = 1) {
+  const footLength = 22;
+  const footAngle = angle + side * 18;
+  const toe = polarPoint(ankle.x, ankle.y, footLength, footAngle);
+
+  drawLine(group, ankle.x, ankle.y, toe.x, toe.y, {
+    width: 7,
+    cap: "round"
+  });
+}
+
+function drawFace(headGroup, cx, cy, pose) {
+  if (pose.eyesClosed) {
+    drawLine(headGroup, cx - 12, cy - 4, cx - 4, cy - 4, { width: 3 });
+    drawLine(headGroup, cx + 4, cy - 4, cx + 12, cy - 4, { width: 3 });
+  } else {
+    headGroup.appendChild(
+      svgEl("circle", {
+        cx: cx - 8,
+        cy: cy - 5,
+        r: 2.8,
+        fill: "#0f172a"
+      })
+    );
+
+    headGroup.appendChild(
+      svgEl("circle", {
+        cx: cx + 8,
+        cy: cy - 5,
+        r: 2.8,
+        fill: "#0f172a"
+      })
+    );
+  }
+
+  drawPath(
+    headGroup,
+    `M ${cx - 8} ${cy + 11} Q ${cx} ${cy + 18} ${cx + 8} ${cy + 11}`,
+    { width: 3 }
+  );
+}
+
+function drawHair(headGroup, cx, cy, pose) {
+  const hs = pose.hairSwing ?? 0;
+
+  /*
+    Capelli: sempre solo quattro fili 2D.
+    Due a sinistra e due a destra, lunghi fino a sotto le spalle / metà schiena.
+    Nessuna massa piena.
+  */
+  const hairPaths = [
+    `M ${cx - 18} ${cy - 16}
+     C ${cx - 39 - hs} ${cy + 10},
+       ${cx - 48 - hs} ${cy + 58},
+       ${cx - 36 - hs * 0.45} ${cy + 106}`,
+
+    `M ${cx - 7} ${cy - 23}
+     C ${cx - 25 - hs} ${cy + 18},
+       ${cx - 30 - hs} ${cy + 74},
+       ${cx - 19 - hs * 0.35} ${cy + 124}`,
+
+    `M ${cx + 7} ${cy - 23}
+     C ${cx + 25 - hs} ${cy + 18},
+       ${cx + 30 - hs} ${cy + 74},
+       ${cx + 19 - hs * 0.35} ${cy + 124}`,
+
+    `M ${cx + 18} ${cy - 16}
+     C ${cx + 39 - hs} ${cy + 10},
+       ${cx + 48 - hs} ${cy + 58},
+       ${cx + 36 - hs * 0.45} ${cy + 106}`
+  ];
+
+  for (const d of hairPaths) {
+    drawPath(headGroup, d, { width: 4 });
+  }
+}
+
 function renderStickman(stickmanGroup, pose) {
   clearEl(stickmanGroup);
 
-  const g = svgEl("g");
+  const rootX = pose.rootX ?? 0;
+  const rootY = pose.rootY ?? 0;
+  const bodyTilt = pose.bodyTilt ?? 0;
+  const headTilt = pose.headTilt ?? 0;
+  const headX = pose.headX ?? 0;
+  const headY = pose.headY ?? 0;
 
-  const hip = { x: 210 + pose.rootX, y: 260 + pose.rootY };
-  const neck = { x: 210 + pose.rootX + pose.bodyTilt * 0.5, y: 182 + pose.rootY };
-  const head = { x: neck.x + pose.headX, y: 150 + pose.rootY };
+  const baseX = 210 + rootX;
+  const hipY = 260 + rootY;
 
-  const leftShoulder = { x: neck.x - 28, y: neck.y + 8 };
-  const rightShoulder = { x: neck.x + 28, y: neck.y + 8 };
-  const leftHip = { x: hip.x - 18, y: hip.y };
-  const rightHip = { x: hip.x + 18, y: hip.y };
+  const hip = { x: baseX, y: hipY };
+  const torsoTop = {
+    x: baseX + bodyTilt * 0.25,
+    y: hipY - 78
+  };
 
-  g.appendChild(
-    svgEl("line", {
-      x1: neck.x,
-      y1: neck.y,
-      x2: hip.x,
-      y2: hip.y,
-      stroke: "#0f172a",
-      "stroke-width": 9,
-      "stroke-linecap": "round"
-    })
+  const neck = {
+    x: torsoTop.x,
+    y: torsoTop.y - 5
+  };
+
+  const headCenter = {
+    x: neck.x + headX,
+    y: neck.y - 34 + headY
+  };
+
+  const leftShoulder = {
+    x: torsoTop.x - 30,
+    y: torsoTop.y + 5
+  };
+
+  const rightShoulder = {
+    x: torsoTop.x + 30,
+    y: torsoTop.y + 5
+  };
+
+  const leftHip = {
+    x: hip.x - 18,
+    y: hip.y
+  };
+
+  const rightHip = {
+    x: hip.x + 18,
+    y: hip.y
+  };
+
+  const mainGroup = svgEl("g", {
+    transform: `rotate(${bodyTilt} ${hip.x} ${hip.y})`
+  });
+
+  /*
+    Ordine di disegno:
+    prima capelli posteriori/testa, poi arti, poi busto/testa.
+    Per ora teniamo tutto semplice ma più ordinato del renderer minimale.
+  */
+
+  // Gambe
+  const leftLeg = drawLimb(
+    mainGroup,
+    leftHip,
+    pose.leftLeg?.hip ?? 105,
+    50,
+    pose.leftLeg?.knee ?? -20,
+    54,
+    9
   );
 
+  const rightLeg = drawLimb(
+    mainGroup,
+    rightHip,
+    pose.rightLeg?.hip ?? 75,
+    50,
+    pose.rightLeg?.knee ?? 20,
+    54,
+    9
+  );
+
+  drawFoot(mainGroup, leftLeg.end, leftLeg.finalAngle, -1);
+  drawFoot(mainGroup, rightLeg.end, rightLeg.finalAngle, 1);
+
+  // Braccia
   const leftArm = drawLimb(
-    g,
+    mainGroup,
     leftShoulder,
-    pose.leftArm.shoulder,
+    pose.leftArm?.shoulder ?? -120,
     42,
-    pose.leftArm.elbow,
+    pose.leftArm?.elbow ?? 32,
     38,
     8
   );
 
   const rightArm = drawLimb(
-    g,
+    mainGroup,
     rightShoulder,
-    pose.rightArm.shoulder,
+    pose.rightArm?.shoulder ?? -60,
     42,
-    pose.rightArm.elbow,
+    pose.rightArm?.elbow ?? 32,
     38,
     8
   );
 
-  drawHand(g, leftArm.end.x, leftArm.end.y, pose.leftArm.handOpen, pose.leftArm.handScale);
-  drawHand(g, rightArm.end.x, rightArm.end.y, pose.rightArm.handOpen, pose.rightArm.handScale);
+  drawHand(
+    mainGroup,
+    leftArm.end.x,
+    leftArm.end.y,
+    pose.leftArm?.handOpen ?? true,
+    pose.leftArm?.handScale ?? 1
+  );
 
-  drawLimb(g, leftHip, pose.leftLeg.hip, 50, pose.leftLeg.knee, 54, 9);
-  drawLimb(g, rightHip, pose.rightLeg.hip, 50, pose.rightLeg.knee, 54, 9);
+  drawHand(
+    mainGroup,
+    rightArm.end.x,
+    rightArm.end.y,
+    pose.rightArm?.handOpen ?? true,
+    pose.rightArm?.handScale ?? 1
+  );
 
+  // Busto
+  drawLine(mainGroup, neck.x, neck.y, hip.x, hip.y, {
+    width: 9
+  });
+
+  // Piccolo accenno di spalle, rende il corpo meno “scheletro tecnico”
+  drawLine(mainGroup, leftShoulder.x, leftShoulder.y, rightShoulder.x, rightShoulder.y, {
+    width: 7
+  });
+
+  // Testa + capelli + faccia
   const headGroup = svgEl("g", {
-    transform: `rotate(${pose.headTilt} ${head.x} ${head.y})`
+    transform: `translate(${headCenter.x} ${headCenter.y}) rotate(${headTilt})`
   });
 
   headGroup.appendChild(
     svgEl("circle", {
-      cx: head.x,
-      cy: head.y,
+      cx: 0,
+      cy: 0,
       r: 26,
       fill: "white",
       stroke: "#0f172a",
@@ -169,81 +319,9 @@ function renderStickman(stickmanGroup, pose) {
     })
   );
 
-  const hs = pose.hairSwing;
+  drawHair(headGroup, 0, 0, pose);
+  drawFace(headGroup, 0, 0, pose);
 
-  const hairPaths = [
-    `M ${head.x - 18} ${head.y - 16} C ${head.x - 38 - hs} ${head.y + 10}, ${head.x - 46 - hs} ${head.y + 58}, ${head.x - 34 - hs * 0.4} ${head.y + 104}`,
-    `M ${head.x - 8} ${head.y - 22} C ${head.x - 25 - hs} ${head.y + 18}, ${head.x - 28 - hs} ${head.y + 72}, ${head.x - 18 - hs * 0.35} ${head.y + 122}`,
-    `M ${head.x + 8} ${head.y - 22} C ${head.x + 25 - hs} ${head.y + 18}, ${head.x + 28 - hs} ${head.y + 72}, ${head.x + 18 - hs * 0.35} ${head.y + 122}`,
-    `M ${head.x + 18} ${head.y - 16} C ${head.x + 38 - hs} ${head.y + 10}, ${head.x + 46 - hs} ${head.y + 58}, ${head.x + 34 - hs * 0.4} ${head.y + 104}`
-  ];
-
-  for (const d of hairPaths) {
-    headGroup.appendChild(
-      svgEl("path", {
-        d,
-        fill: "none",
-        stroke: "#0f172a",
-        "stroke-width": 4,
-        "stroke-linecap": "round"
-      })
-    );
-  }
-
-  if (pose.eyesClosed) {
-    headGroup.appendChild(
-      svgEl("line", {
-        x1: head.x - 11,
-        y1: head.y - 4,
-        x2: head.x - 3,
-        y2: head.y - 4,
-        stroke: "#0f172a",
-        "stroke-width": 3,
-        "stroke-linecap": "round"
-      })
-    );
-
-    headGroup.appendChild(
-      svgEl("line", {
-        x1: head.x + 3,
-        y1: head.y - 4,
-        x2: head.x + 11,
-        y2: head.y - 4,
-        stroke: "#0f172a",
-        "stroke-width": 3,
-        "stroke-linecap": "round"
-      })
-    );
-  } else {
-    headGroup.appendChild(
-      svgEl("circle", {
-        cx: head.x - 8,
-        cy: head.y - 5,
-        r: 2.5,
-        fill: "#0f172a"
-      })
-    );
-
-    headGroup.appendChild(
-      svgEl("circle", {
-        cx: head.x + 8,
-        cy: head.y - 5,
-        r: 2.5,
-        fill: "#0f172a"
-      })
-    );
-  }
-
-  headGroup.appendChild(
-    svgEl("path", {
-      d: `M ${head.x - 8} ${head.y + 11} Q ${head.x} ${head.y + 18} ${head.x + 8} ${head.y + 11}`,
-      fill: "none",
-      stroke: "#0f172a",
-      "stroke-width": 3,
-      "stroke-linecap": "round"
-    })
-  );
-
-  g.appendChild(headGroup);
-  stickmanGroup.appendChild(g);
+  mainGroup.appendChild(headGroup);
+  stickmanGroup.appendChild(mainGroup);
 }
