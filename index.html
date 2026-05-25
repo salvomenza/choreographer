@@ -1,1 +1,49 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Le sirene — Coreografia</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>Le sirene — Coreografia</h1>
+        <p>Lettore SVG per coreografie da file JSON</p>
+      </header>
 
+      <section class="player">
+        <div class="stage">
+          <svg id="stageSvg" viewBox="0 0 420 410" aria-label="Stickman coreografico">
+            <line x1="30" y1="370" x2="390" y2="370" class="floor" />
+            <g id="stickman"></g>
+            <g id="karaokeBox" transform="translate(30 330)">
+              <rect x="0" y="0" width="360" height="58" rx="18" class="karaoke-bg"></rect>
+              <text id="karaokeText" x="180" y="24" text-anchor="middle"></text>
+              <text id="karaokeMeta" x="180" y="45" text-anchor="middle"></text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="controls">
+          <button id="playBtn">Play</button>
+          <button id="restartBtn">Torna all’inizio</button>
+          <label>
+            <input id="metronomeToggle" type="checkbox" />
+            Metronomo
+          </label>
+        </div>
+
+        <audio id="audio" controls preload="metadata"></audio>
+      </section>
+
+      <section>
+        <h2>Stato</h2>
+        <pre id="status">Caricamento…</pre>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
